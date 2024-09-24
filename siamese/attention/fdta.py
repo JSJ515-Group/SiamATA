@@ -71,7 +71,7 @@ def resize_complex_weight(origin_weight, new_h, new_w):
     return new_weight
 
 
-class DynamicFilter(nn.Module):
+class FDTA(nn.Module):
     def __init__(self, dim, expansion_ratio=2, reweight_expansion_ratio=.25,
                  act1_layer=StarReLU, act2_layer=nn.Identity,
                  bias=False, num_filters=4, size=14, weight_resize=False,
@@ -130,7 +130,7 @@ class DynamicFilter(nn.Module):
 
 def test():
     input = torch.randn(32, 256, 31, 31).cuda()
-    model = DynamicFilter(256, size=31).cuda()  # size 设置成图片的大小
+    model = FDTA(256, size=31).cuda()  # size 设置成图片的大小
     output = model(input)
     print(output.shape)
 

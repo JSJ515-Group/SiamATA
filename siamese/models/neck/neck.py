@@ -6,7 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import torch.nn as nn
-from siamese.attention.iema import IEMA
+from siamese.attention.taa import TAA
 
 
 

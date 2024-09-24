@@ -8,9 +8,9 @@ from timm.models._efficientnet_blocks import SqueezeExcite
 from timm.models.layers import DropPath
 
 
-class EMA(nn.Module):
+class MixAttention(nn.Module):
     def __init__(self, channels, factor=32):
-        super(EMA, self).__init__()
+        super(MixAttention, self).__init__()
         self.groups = factor
         assert channels // self.groups > 0
         self.softmax = nn.Softmax(-1)
@@ -104,7 +104,7 @@ class ConvNormAct(nn.Module):
         return x
 
 
-class IEMA(nn.Module):
+class TAA(nn.Module):
 
     def __init__(self, dim_in, dim_out, norm_in=True, has_skip=True, exp_ratio=1.0, norm_layer='bn_2d',
                  act_layer='relu', v_proj=True, dw_ks=3, stride=1, dilation=1, se_ratio=0.0,
@@ -116,7 +116,7 @@ class IEMA(nn.Module):
         self.has_skip = (dim_in == dim_out and stride == 1) and has_skip
         self.attn_s = attn_s
         if self.attn_s:
-            self.ema = EMA(dim_in)
+            self.mix_attention = MixAttention(dim_in)
         else:
             if v_proj:
                 self.v = ConvNormAct(dim_in, dim_mid, kernel_size=1, bias=qkv_bias, norm_layer='none',
@@ -136,7 +136,7 @@ class IEMA(nn.Module):
         shortcut = x
         x = self.norm(x)
         if self.attn_s:
-            x = self.ema(x)
+            x = self.mix_attention(x)
         else:
             x = self.v(x)
 
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     image = torch.rand(*image_size)
 
     # Model
-    model = IEMA(256, 256)
+    model = TAA(256, 256)
 
     out = model(image)
     print(out.size())

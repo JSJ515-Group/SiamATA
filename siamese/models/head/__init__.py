@@ -3,7 +3,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from siamese.models.head.ban import UPChannelBAN, DepthwiseBAN, MultiBAN, NonLocalBAN, CommonBAN
+from siamese.models.head.ban import UPChannelBAN, DepthwiseBAN, MultiBAN, NonLocalBAN
 
 
 BANS = {
@@ -11,7 +11,6 @@ BANS = {
         'DepthwiseBAN': DepthwiseBAN,
         'MultiBAN': MultiBAN,
         'NonLocalBAN': NonLocalBAN,
-        'CommonBAN': CommonBAN,
        }
 
 

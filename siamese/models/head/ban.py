@@ -9,8 +9,7 @@ import torch.nn.functional as F
 
 from siamese.core.xcorr import xcorr_fast, xcorr_depthwise, xcorr_pixelwise
 from siamese.models.head.pw_head import PWHead
-from siamese.models.head.dw_head import DWHead
-from siamese.attention.dfformer import DynamicFilter
+from siamese.attention.fdta import FDTA
 
 
 class BAN(nn.Module):
@@ -137,22 +136,6 @@ class MultiBAN(BAN):
             return avg(cls), avg(loc)
 
 
-class CommonBAN(nn.Module):
-    def __init__(self, in_channels=256):
-        super(CommonBAN, self).__init__()
-        self.xcorr = xcorr_depthwise
-        self.head = DWHead(in_channels, origin_tower=True)
-
-    def forward(self, zfc, xfc, zfr, xfr):
-        # depth-wise corr
-        features_cls = self.xcorr(zfc, xfc)
-        features_reg = self.xcorr(zfr, xfr)
-
-        # predict head
-        cls, reg = self.head(features_cls, features_reg)
-        return cls, reg
-
-
 class NonLocalBAN(nn.Module):
     def __init__(self, in_channels=256):
         super(NonLocalBAN, self).__init__()
@@ -168,9 +151,9 @@ class NonLocalBAN(nn.Module):
             nn.ReLU(inplace=True),
         )
 
-        # attention
-        self.attention_cls = DynamicFilter(in_channels, size=31)
-        self.attention_reg = DynamicFilter(in_channels, size=31)
+        # fdta
+        self.task_aware_cls = FDTA(in_channels, size=31)
+        self.task_aware_reg = FDTA(in_channels, size=31)
 
         # predict head
         self.head = PWHead(in_channels)
@@ -191,9 +174,9 @@ class NonLocalBAN(nn.Module):
         features_cls = self.fi_cls(features_cls)
         features_reg = self.fi_reg(features_reg)
 
-        # attention
-        features_cls = self.attention_cls(features_cls)
-        features_reg = self.attention_reg(features_reg)
+        # fdta
+        features_cls = self.task_aware_cls(features_cls)
+        features_reg = self.task_aware_reg(features_reg)
 
         # predict head
         cls, reg = self.head(features_cls, features_reg)
