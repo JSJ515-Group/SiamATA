@@ -17,7 +17,7 @@ class AdjustLayer(nn.Module):
             nn.Conv2d(in_channels, out_channels, kernel_size=1, bias=False),
             nn.BatchNorm2d(out_channels),
         )
-        self.target_aware = IEMA(out_channels, out_channels)
+        self.target_aware = TAA(out_channels, out_channels)
 
     def forward(self, x):
         x = self.downsample(x)
